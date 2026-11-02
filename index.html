@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriLink LK - Agricultural Marketplace & Price Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            agri: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+              950: '#052e16',
+            },
+            harvest: {
+              gold: '#eab308',
+              amber: '#d97706',
+              earth: '#78350f'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbar for data tables */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .badge-pulse {
+      animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans flex min-h-screen overflow-x-hidden">
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="sidebarBackdrop" onclick="toggleSidebar(false)" class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm hidden lg:hidden transition-opacity duration-300"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside id="mainSidebar" class="fixed top-0 bottom-0 left-0 z-50 w-72 bg-emerald-950 text-white flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 lg:static lg:z-auto border-r border-emerald-900/50 shadow-2xl lg:shadow-none">
+    
+    <!-- Brand Header -->
+    <div class="h-20 flex items-center justify-between px-6 border-b border-emerald-900/70">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i data-lucide="sprout" class="w-6 h-6 text-emerald-950 stroke-[2.5]"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-1">
+            <span class="text-xl font-extrabold tracking-tight text-white">AgriLink</span>
+            <span class="text-xs px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold tracking-wider border border-emerald-400/30">LK</span>
+          </div>
+          <p class="text-[11px] text-emerald-300/70 font-medium">Sri Lanka Farmer Hub</p>
+        </div>
+      </div>
+      <!-- Close button on mobile -->
+      <button onclick="toggleSidebar(false)" class="lg:hidden text-emerald-300 hover:text-white p-1 rounded-lg">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <!-- User Mini Profile in Sidebar -->
+    <div class="p-5 border-b border-emerald-900/40">
+      <div class="flex items-center gap-3 bg-emerald-900/50 p-3 rounded-2xl border border-emerald-800/60">
+        <div class="relative">
+          <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=120" alt="Farmer Bandara" class="w-11 h-11 rounded-xl object-cover ring-2 ring-emerald-500/60" onerror="this.src='https://placehold.co/100x100/15803d/ffffff?text=SB'">
+          <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-400 border-2 border-emerald-950 rounded-full"></span>
+        </div>
+        <div class="overflow-hidden">
+          <h4 class="text-sm font-bold text-white truncate">Sunil Bandara</h4>
+          <p class="text-xs text-emerald-300 flex items-center gap-1 font-medium">
+            <i data-lucide="map-pin" class="w-3 h-3 text-emerald-400"></i> Dambulla, Matale
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1.5 text-sm">
+      <div class="px-3 pb-2 text-[11px] font-bold tracking-wider text-emerald-400/80 uppercase">Main Navigation</div>
+
+      <a href="#" onclick="setActiveNav(this); return false;" class="nav-item flex items-center justify-between px-3.5 py-3 rounded-xl font-semibold bg-emerald-600 text-white shadow-md shadow-emerald-950/30 transition-all">
+        <div class="flex items-center gap-3">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <span>Overview</span>
+        </div>
+        <span class="w-2 h-2 rounded-full bg-white"></span>
+      </a>
+
+      <a href="#marketPrices" onclick="setActiveNav(this); return false;" class="nav-item flex items-center justify-between px-3.5 py-3 rounded-xl font-medium text-emerald-200/90 hover:bg-emerald-900/50 hover:text-white transition-all">
+        <div class="flex items-center gap-3">
+          <i data-lucide="trending-up" class="w-5 h-5"></i>
+          <span>Market Prices</span>
+        </div>
+        <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Live</span>
+      </a>
+
+      <a href="#produceListings" onclick="setActiveNav(this); return false;" class="nav-item flex items-center justify-between px-3.5 py-3 rounded-xl font-medium text-emerald-200/90 hover:bg-emerald-900/50 hover:text-white transition-all">
+        <div class="flex items-center gap-3">
+          <i data-lucide="boxes" class="w-5 h-5"></i>
+          <span>Produce Listings</span>
+        </div>
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-800 text-emerald-200">14</span>
+      </a>
+
+      <a href="#ordersSection" onclick="setActiveNav(this); return false;" class="nav-item flex items-center justify-between px-3.5 py-3 rounded-xl font-medium text-emerald-200/90 hover:bg-emerald-900/50 hover:text-white transition-all">
+        <div class="flex items-center gap-3">
+          <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+          <span>Orders & Inquiries</span>
+        </div>
+        <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-emerald-950">5 New</span>
+      </a>
+
+      <a href="#cropAdvisory" onclick="setActiveNav(this); return false;" class="nav-item flex items-center justify-between px-3.5 py-3 rounded-xl font-medium text-emerald-200/90 hover:bg-emerald-900/50 hover:text-white transition-all">
+        <div class="flex items-center gap-3">
+          <i data-lucide="cloud-sun-rain" class="w-5 h-5"></i>
+          <span>Weather & Advisory</span>
+        </div>
+      </a>
+
+      <div class="pt-6 px-3 pb-2 text-[11px] font-bold tracking-wider text-emerald-400/80 uppercase">Management</div>
+
+      <a href="#transport" onclick="setActiveNav(this); return false;" class="nav-item flex items-center gap-3 px-3.5 py-3 rounded-xl font-medium text-emerald-200/90 hover:bg-emerald-900/50 hover:text-white transition-all">
+        <i data-lucide="truck" class="w-5 h-5"></i>
+        <span>Agri-Logistics</span>
+      </a>
+
+      <a href="#settings" onclick="setActiveNav(this); return false;" class="nav-item flex items-center gap-3 px-3.5 py-3 rounded-xl font-medium text-emerald-200/90 hover:bg-emerald-900/50 hover:text-white transition-all">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+        <span>Settings & Farm ID</span>
+      </a>
+    </nav>
+
+    <!-- Support Banner at bottom -->
+    <div class="p-4 m-4 rounded-2xl bg-gradient-to-br from-emerald-900/80 to-emerald-900/30 border border-emerald-800/80 text-center">
+      <i data-lucide="phone-call" class="w-6 h-6 text-emerald-400 mx-auto mb-2"></i>
+      <h5 class="text-xs font-bold text-white mb-0.5">Govt Agri Helpline (DOA)</h5>
+      <p class="text-[11px] text-emerald-300 mb-2">Short code dial: <span class="font-bold text-white">1920</span></p>
+      <button class="w-full text-xs font-semibold py-1.5 px-3 bg-emerald-600/50 hover:bg-emerald-600 text-emerald-100 rounded-lg transition-colors border border-emerald-500/40">
+        Call Advisor
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+
+    <!-- Top Navbar -->
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3 lg:gap-4 flex-1 max-w-xl">
+        <!-- Drawer toggle button -->
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 focus:outline-none">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+
+        <!-- Search input with filter -->
+        <div class="relative w-full">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+            <i data-lucide="search" class="w-4 h-4"></i>
+          </span>
+          <input 
+            type="text" 
+            id="globalSearch"
+            oninput="handleSearch(this.value)"
+            placeholder="Search produce (e.g. Red Onions, Carrots), wholesale markets, buyer inquiries..." 
+            class="w-full pl-10 pr-4 py-2 text-sm bg-slate-100/80 border border-transparent focus:border-emerald-500 focus:bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all placeholder:text-slate-400"
+          >
+        </div>
+      </div>
+
+      <!-- Right controls -->
+      <div class="flex items-center gap-2 sm:gap-4 ml-4">
+        <!-- Market Center Selector -->
+        <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200/70 rounded-xl text-xs font-semibold text-emerald-800">
+          <i data-lucide="store" class="w-4 h-4 text-emerald-600"></i>
+          <span>DEC Center: <strong>Dambulla</strong></span>
+        </div>
+
+        <!-- Currency & Language tag -->
+        <div class="flex items-center divide-x divide-slate-200 bg-slate-100 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700">
+          <span class="pr-2 text-emerald-700 flex items-center gap-1">
+            <i data-lucide="badge-cent" class="w-3.5 h-3.5"></i> LKR
+          </span>
+          <span class="pl-2 uppercase tracking-wide cursor-pointer hover:text-emerald-700">EN | සිං</span>
+        </div>
+
+        <!-- Notifications -->
+        <div class="relative">
+          <button id="notifyBtn" onclick="toggleNotificationDropdown()" class="p-2.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-colors relative">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full badge-pulse"></span>
+          </button>
+          
+          <!-- Notification Dropdown -->
+          <div id="notifyDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50">
+            <div class="px-4 pb-2 border-b border-slate-100 flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Notifications</span>
+              <span class="text-[11px] text-emerald-600 font-semibold cursor-pointer">Mark all read</span>
+            </div>
+            <div class="divide-y divide-slate-50 text-xs">
+              <a href="#" class="block p-3 hover:bg-slate-50">
+                <p class="font-bold text-slate-800">New Bulk Inquiry from Keells Super</p>
+                <p class="text-slate-500 text-[11px]">Requested 500kg Grade-A Carrots • 10m ago</p>
+              </a>
+              <a href="#" class="block p-3 hover:bg-slate-50">
+                <p class="font-bold text-emerald-700">Dambulla DEC Price Spike</p>
+                <p class="text-slate-500 text-[11px]">Green Chili wholesale climbed +14.2% today</p>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Profile Avatar -->
+        <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+          <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=120" alt="Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-emerald-500/20" onerror="this.src='https://placehold.co/100x100/15803d/ffffff?text=SB'">
+          <div class="hidden xl:block text-left text-xs">
+            <p class="font-bold text-slate-800 leading-tight">Sunil Bandara</p>
+            <p class="text-[11px] text-emerald-600 font-medium">Verified Producer #LK-882</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Body -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6">
+
+      <!-- Welcome Banner & Quick Action -->
+      <div class="rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white p-6 sm:p-8 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute right-12 top-6 opacity-10 hidden md:block pointer-events-none">
+          <i data-lucide="tractor" class="w-48 h-48 text-white"></i>
+        </div>
+
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="space-y-2 max-w-xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              Yala Season Active Harvesting
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Ayubowan, Sunil! Welcome to your Farm Hub</h1>
+            <p class="text-sm text-emerald-100/90 leading-relaxed">
+              Manning and Dambulla Economic Centers report high demand for root crops and chillies today. Review your harvest dispatch schedules below.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <button onclick="openListingModal()" class="px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold text-sm flex items-center gap-2 shadow-lg shadow-emerald-950/40 transition-all transform hover:-translate-y-0.5">
+              <i data-lucide="plus-circle" class="w-4 h-4 stroke-[2.5]"></i>
+              <span>Post New Harvest</span>
+            </button>
+            <button onclick="exportReport()" class="px-4 py-3 rounded-2xl bg-emerald-950/60 hover:bg-emerald-950/90 text-white font-medium text-sm flex items-center gap-2 border border-emerald-700/60 transition-all">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+              <span>Daily Rate Card</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Metrics Row -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <!-- Card 1: Revenue -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Gross Sales (This Month)</span>
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <i data-lucide="wallet" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            LKR 482,500
+          </div>
+          <div class="mt-2 flex items-center gap-2 text-xs font-semibold text-emerald-600">
+            <span class="inline-flex items-center"><i data-lucide="trending-up" class="w-3.5 h-3.5 mr-0.5"></i> +12.4%</span>
+            <span class="text-slate-400 font-normal">vs last month</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Active Listings -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Listings</span>
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <i data-lucide="package" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            6.8 <span class="text-lg font-bold text-slate-500">Tons</span>
+          </div>
+          <div class="mt-2 flex items-center gap-2 text-xs font-semibold text-blue-600">
+            <span class="inline-flex items-center">4 Commodities</span>
+            <span class="text-slate-400 font-normal">• Ready to dispatch</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Pending Inquiries -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Inquiries & Orders</span>
+            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            18 Orders
+          </div>
+          <div class="mt-2 flex items-center gap-2 text-xs font-semibold text-amber-600">
+            <span class="inline-flex items-center"><i data-lucide="alert-circle" class="w-3.5 h-3.5 mr-0.5"></i> 5 Awaiting confirmation</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Index Price -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Vegi Price Index (DEC)</span>
+            <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+              <i data-lucide="line-chart" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            126.4 <span class="text-sm font-semibold text-slate-400">pts</span>
+          </div>
+          <div class="mt-2 flex items-center gap-2 text-xs font-semibold text-emerald-600">
+            <span class="inline-flex items-center"><i data-lucide="arrow-up-right" class="w-3.5 h-3.5 mr-0.5"></i> +3.1%</span>
+            <span class="text-slate-400 font-normal">Steady demand</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Center Grid: Market Prices & Sri Lanka Weather / Advisory -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Column 1 & 2: Wholesale Market Price Tracker -->
+        <section id="marketPrices" class="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg font-extrabold text-slate-900">Sri Lanka Daily Wholesale Rates</h2>
+                  <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">Official DEC</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">Verified prices collected from Dambulla, Manning Market & Thambuththegama</p>
+              </div>
+
+              <!-- Market Filter Buttons -->
+              <div class="inline-flex p-1 bg-slate-100 rounded-xl text-xs font-semibold text-slate-600" id="marketTabs">
+                <button onclick="filterMarket('all', this)" class="px-3 py-1.5 rounded-lg bg-white text-emerald-700 shadow-sm font-bold">All Centers</button>
+                <button onclick="filterMarket('Dambulla', this)" class="px-3 py-1.5 rounded-lg hover:text-slate-900">Dambulla</button>
+                <button onclick="filterMarket('Colombo', this)" class="px-3 py-1.5 rounded-lg hover:text-slate-900">Manning</button>
+                <button onclick="filterMarket('Keppetipola', this)" class="px-3 py-1.5 rounded-lg hover:text-slate-900">Keppetipola</button>
+              </div>
+            </div>
+
+            <!-- Price Table -->
+            <div class="overflow-x-auto mt-4">
+              <table class="w-full text-left text-sm" id="produceTable">
+                <thead>
+                  <tr class="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                    <th class="py-3 px-3">Commodity & Grade</th>
+                    <th class="py-3 px-3">Market Hub</th>
+                    <th class="py-3 px-3">Wholesale (LKR/kg)</th>
+                    <th class="py-3 px-3">Day Change</th>
+                    <th class="py-3 px-3">Weekly Range</th>
+                    <th class="py-3 px-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium" id="priceTableBody">
+                  <!-- Generated by JavaScript dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
+            <span>Rates updated: Today at 05:30 AM (HARTI / Department of Agriculture data)</span>
+            <a href="#" class="font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
+              View Historical Price Charts <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </a>
+          </div>
+        </section>
+
+        <!-- Column 3: Weather & Crop Advisory (Localized Sri Lanka) -->
+        <section id="cropAdvisory" class="bg-gradient-to-b from-white to-emerald-50/40 rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <i data-lucide="cloud-rain" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="font-extrabold text-slate-900 text-base leading-tight">Agri-Weather & Advisory</h3>
+                  <p class="text-[11px] text-slate-500">Central Province (Matale / Dambulla)</p>
+                </div>
+              </div>
+              <span class="text-xs font-bold text-emerald-800 bg-emerald-100/70 px-2.5 py-1 rounded-full">Zone: IL1</span>
+            </div>
+
+            <!-- Weather Widget Card -->
+            <div class="bg-white rounded-2xl p-4 border border-emerald-100 shadow-sm mb-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-3xl font-black text-slate-900">28°C</span>
+                  <p class="text-xs font-medium text-slate-500 mt-0.5">Scattered Afternoon Thundershowers</p>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center">
+                  <i data-lucide="sun-medium" class="w-7 h-7"></i>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-100 text-center text-xs">
+                <div>
+                  <span class="block text-slate-400 text-[10px] uppercase font-bold">Rainfall</span>
+                  <span class="font-bold text-slate-700">65 mm</span>
+                </div>
+                <div>
+                  <span class="block text-slate-400 text-[10px] uppercase font-bold">Humidity</span>
+                  <span class="font-bold text-slate-700">82%</span>
+                </div>
+                <div>
+                  <span class="block text-slate-400 text-[10px] uppercase font-bold">Soil Moisture</span>
+                  <span class="font-bold text-emerald-700">Optimal</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Crop Guidelines -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Department of Agriculture Advisories</h4>
+              
+              <div class="p-3 bg-white rounded-xl border border-slate-100 shadow-sm flex items-start gap-3">
+                <div class="p-1.5 rounded-lg bg-amber-100 text-amber-700 mt-0.5">
+                  <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-slate-800">Big Onion Storage Warning</p>
+                  <p class="text-[11px] text-slate-600 mt-0.5">High evening humidity expected. Ensure proper curing and air draft ventilation to mitigate fungal rot.</p>
+                </div>
+              </div>
+
+              <div class="p-3 bg-white rounded-xl border border-slate-100 shadow-sm flex items-start gap-3">
+                <div class="p-1.5 rounded-lg bg-emerald-100 text-emerald-700 mt-0.5">
+                  <i data-lucide="leaf" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-slate-800">Paddy Fertilizer Window</p>
+                  <p class="text-[11px] text-slate-600 mt-0.5">Yala harvest prep: ideal application window for potash blend prior to Wednesday rains.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="requestAdvisoryModal()" class="w-full mt-4 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors">
+            <i data-lucide="messages-square" class="w-4 h-4 text-emerald-400"></i>
+            <span>Ask Agronomist AI Assistant</span>
+          </button>
+        </section>
+
+      </div>
+
+      <!-- Bottom Split: Orders & Inquiries & Active Harvest Inventory -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Orders & Transaction Enquiries (2 cols) -->
+        <section id="ordersSection" class="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+            <div>
+              <h2 class="text-lg font-extrabold text-slate-900">Direct Buyer Inquiries & Purchase Orders</h2>
+              <p class="text-xs text-slate-500">Supermarket chains, exporters, and wholesale aggregators</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <select onchange="filterOrders(this.value)" class="text-xs font-bold border border-slate-200 rounded-xl px-3 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-200 text-slate-700">
+                <option value="all">All Statuses</option>
+                <option value="Pending">Pending Inquiries</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="In Transit">In Transit</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm" id="ordersTable">
+              <thead>
+                <tr class="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                  <th class="py-3 px-3">Order / Buyer</th>
+                  <th class="py-3 px-3">Produce Requested</th>
+                  <th class="py-3 px-3">Volume</th>
+                  <th class="py-3 px-3">Total Value</th>
+                  <th class="py-3 px-3">Status</th>
+                  <th class="py-3 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 font-medium" id="ordersBody">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Current Produce Inventory / My Listings (1 col) -->
+        <section id="produceListings" class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-extrabold text-slate-900 text-base">My Listed Harvest</h3>
+                <p class="text-xs text-slate-500">Ready in farm packhouse</p>
+              </div>
+              <button onclick="openListingModal()" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
+                + Add Batch
+              </button>
+            </div>
+
+            <!-- List of produce items -->
+            <div class="space-y-3" id="produceItemList">
+              <!-- Item 1 -->
+              <div class="p-3.5 rounded-2xl border border-slate-100 hover:border-emerald-200 bg-slate-50/50 transition-colors flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">
+                    🥕
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Nuwara Eliya Carrots</h4>
+                    <p class="text-[11px] text-slate-500">Grade A • 2,200 kg remaining</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-bold text-slate-900">LKR 280/kg</span>
+                  <span class="block text-[10px] text-emerald-600 font-medium">Available</span>
+                </div>
+              </div>
+
+              <!-- Item 2 -->
+              <div class="p-3.5 rounded-2xl border border-slate-100 hover:border-emerald-200 bg-slate-50/50 transition-colors flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs">
+                    🌶️
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Green Chili (MI-2)</h4>
+                    <p class="text-[11px] text-slate-500">Grade A • 850 kg remaining</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-bold text-slate-900">LKR 490/kg</span>
+                  <span class="block text-[10px] text-emerald-600 font-medium">Available</span>
+                </div>
+              </div>
+
+              <!-- Item 3 -->
+              <div class="p-3.5 rounded-2xl border border-slate-100 hover:border-emerald-200 bg-slate-50/50 transition-colors flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-yellow-100 text-yellow-700 flex items-center justify-center font-bold text-xs">
+                    🌾
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Samba Paddy (Araliya)</h4>
+                    <p class="text-[11px] text-slate-500">Dry Harvested • 3,500 kg</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-bold text-slate-900">LKR 145/kg</span>
+                  <span class="block text-[10px] text-amber-600 font-medium">Reserved</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center gap-3">
+            <i data-lucide="shield-check" class="w-5 h-5 text-emerald-700 flex-shrink-0"></i>
+            <p class="text-[11px] text-emerald-800 leading-tight">
+              All harvest listings are protected by the AgriLink Escrow Guarantee. Direct bank settlement within 24 hours of delivery.
+            </p>
+          </div>
+        </section>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal: Post New Harvest Listing -->
+  <div id="listingModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 relative">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="text-lg font-extrabold text-slate-900">Post New Produce Listing</h3>
+          <p class="text-xs text-slate-500">Publish your crop availability to supermarkets & wholesalers</p>
+        </div>
+        <button onclick="closeListingModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="newProduceForm" onsubmit="handleNewListing(event)" class="space-y-4 mt-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Crop / Commodity Name</label>
+          <input type="text" id="cropName" required placeholder="e.g. Red Onions (Jaffna / Dambulla)" class="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Quantity (Kilograms)</label>
+            <input type="number" id="cropQty" required placeholder="1000" class="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Expected Price (LKR / kg)</label>
+            <input type="number" id="cropPrice" required placeholder="320" class="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Grade / Quality</label>
+            <select id="cropGrade" class="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300">
+              <option value="Grade A (Export / Supermarket)">Grade A (Supermarket)</option>
+              <option value="Grade B (Wholesale Standard)">Grade B (Wholesale Standard)</option>
+              <option value="Processing Grade">Processing Grade</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Harvest Date</label>
+            <input type="date" id="cropDate" required class="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300">
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeListingModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-700/20">Publish to Market</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Box -->
+  <div id="toastMessage" class="fixed bottom-6 right-6 z-50 hidden bg-slate-900 text-white text-xs px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 border border-slate-700 transition-all">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastText">Action completed successfully</span>
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    // Produce Market Data with Sri Lankan Context
+    const marketRates = [
+      { id: 1, name: "Carrots (Upcountry)", market: "Dambulla", price: 290, prevPrice: 275, trend: "up", min: 260, max: 310, icon: "🥕" },
+      { id: 2, name: "Green Chili (A-Grade)", market: "Dambulla", price: 520, prevPrice: 470, trend: "up", min: 460, max: 550, icon: "🌶️" },
+      { id: 3, name: "Red Onions (Local)", market: "Keppetipola", price: 340, prevPrice: 355, trend: "down", min: 320, max: 380, icon: "🧅" },
+      { id: 4, name: "Coconut (1000 nuts bulk)", market: "Colombo", price: 95, prevPrice: 90, trend: "up", min: 88, max: 105, icon: "🥥", unit: "per nut" },
+      { id: 5, name: "Samba Paddy (Raw Rice)", market: "Thambuththegama", price: 148, prevPrice: 148, trend: "stable", min: 142, max: 152, icon: "🌾" },
+      { id: 6, name: "Tea Green Leaf (OP1)", market: "Galle", price: 285, prevPrice: 280, trend: "up", min: 270, max: 295, icon: "🍃" },
+      { id: 7, name: "Tomato (Plastic Crates)", market: "Colombo", price: 220, prevPrice: 250, trend: "down", min: 190, max: 260, icon: "🍅" }
+    ];
+
+    // Order Requests
+    const ordersData = [
+      { id: "ORD-8821", buyer: "Keells Super Logistics", crop: "Grade-A Carrots", volume: "1,200 kg", total: "LKR 348,000", status: "Confirmed", date: "Today" },
+      { id: "ORD-8822", buyer: "Cargills Agrifoods", crop: "Green Chili (MI-2)", volume: "450 kg", total: "LKR 234,000", status: "Pending", date: "Today" },
+      { id: "ORD-8819", buyer: "Lanka Wholesale Consortium", crop: "Dry Red Onions", volume: "2,000 kg", total: "LKR 680,000", status: "In Transit", date: "Yesterday" },
+      { id: "ORD-8815", buyer: "Hemas Consumer Brands", crop: "Coconut Copra", volume: "3,000 nuts", total: "LKR 285,000", status: "Confirmed", date: "01 Nov" }
+    ];
+
+    // Render Market Rates Table
+    function renderMarketTable(data) {
+      const tbody = document.getElementById('priceTableBody');
+      if (!tbody) return;
+
+      tbody.innerHTML = data.map(item => {
+        const changePercent = Math.abs(((item.price - item.prevPrice) / item.prevPrice) * 100).toFixed(1);
+        const isUp = item.trend === 'up';
+        const isDown = item.trend === 'down';
+        
+        let trendBadge = `<span class="inline-flex items-center text-xs font-bold text-slate-500">0.0% —</span>`;
+        if (isUp) {
+          trendBadge = `<span class="inline-flex items-center text-xs font-bold text-emerald-600"><i data-lucide="arrow-up" class="w-3.5 h-3.5 mr-0.5"></i> +${changePercent}%</span>`;
+        } else if (isDown) {
+          trendBadge = `<span class="inline-flex items-center text-xs font-bold text-rose-600"><i data-lucide="arrow-down" class="w-3.5 h-3.5 mr-0.5"></i> -${changePercent}%</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="py-3 px-3">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">${item.icon}</span>
+                <div>
+                  <span class="font-bold text-slate-900 block">${item.name}</span>
+                  <span class="text-[11px] text-slate-400">DEC Verified Grade</span>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 px-3">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium">
+                ${item.market}
+              </span>
+            </td>
+            <td class="py-3 px-3 font-extrabold text-slate-900">
+              LKR ${item.price} <span class="text-[11px] font-normal text-slate-400">${item.unit || '/kg'}</span>
+            </td>
+            <td class="py-3 px-3">
+              ${trendBadge}
+            </td>
+            <td class="py-3 px-3 text-xs text-slate-500">
+              ${item.min} - ${item.max} LKR
+            </td>
+            <td class="py-3 px-3 text-right">
+              <button onclick="quoteProduce('${item.name}', ${item.price})" class="px-2.5 py-1 text-xs font-bold text-emerald-700 hover:text-white bg-emerald-50 hover:bg-emerald-600 rounded-lg transition-colors border border-emerald-200">
+                Offer
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Refresh icons after DOM injection
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    // Render Orders Table
+    function renderOrdersTable(data) {
+      const tbody = document.getElementById('ordersBody');
+      if (!tbody) return;
+
+      tbody.innerHTML = data.map(order => {
+        let badgeColor = "bg-amber-100 text-amber-800 border-amber-200";
+        if (order.status === "Confirmed") badgeColor = "bg-emerald-100 text-emerald-800 border-emerald-200";
+        if (order.status === "In Transit") badgeColor = "bg-blue-100 text-blue-800 border-blue-200";
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="py-3.5 px-3">
+              <span class="text-xs font-mono font-bold text-slate-400 block">${order.id}</span>
+              <span class="font-bold text-slate-800">${order.buyer}</span>
+            </td>
+            <td class="py-3.5 px-3 font-medium text-slate-700">${order.crop}</td>
+            <td class="py-3.5 px-3 text-xs font-semibold text-slate-800">${order.volume}</td>
+            <td class="py-3.5 px-3 font-bold text-slate-900">${order.total}</td>
+            <td class="py-3.5 px-3">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${badgeColor}">
+                ${order.status}
+              </span>
+            </td>
+            <td class="py-3.5 px-3 text-right">
+              <button onclick="showOrderAction('${order.id}')" class="text-slate-400 hover:text-slate-800 p-1 rounded-lg">
+                <i data-lucide="more-vertical" class="w-4 h-4"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    // Market tab filter
+    function filterMarket(marketName, buttonElement) {
+      // update button styles
+      const tabContainer = document.getElementById('marketTabs');
+      Array.from(tabContainer.children).forEach(btn => {
+        btn.className = "px-3 py-1.5 rounded-lg hover:text-slate-900";
+      });
+      buttonElement.className = "px-3 py-1.5 rounded-lg bg-white text-emerald-700 shadow-sm font-bold";
+
+      if (marketName === 'all') {
+        renderMarketTable(marketRates);
+      } else {
+        const filtered = marketRates.filter(item => item.market.toLowerCase().includes(marketName.toLowerCase()));
+        renderMarketTable(filtered);
+      }
+    }
+
+    // Order status filter
+    function filterOrders(status) {
+      if (status === 'all') {
+        renderOrdersTable(ordersData);
+      } else {
+        const filtered = ordersData.filter(o => o.status === status);
+        renderOrdersTable(filtered);
+      }
+    }
+
+    // Global Search Function
+    function handleSearch(term) {
+      const q = term.toLowerCase().trim();
+      const filteredRates = marketRates.filter(item => 
+        item.name.toLowerCase().includes(q) || 
+        item.market.toLowerCase().includes(q)
+      );
+      renderMarketTable(filteredRates);
+    }
+
+    // Modal Handlers
+    function openListingModal() {
+      const modal = document.getElementById('listingModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeListingModal() {
+      const modal = document.getElementById('listingModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Handle Form Submit
+    function handleNewListing(e) {
+      e.preventDefault();
+      const name = document.getElementById('cropName').value;
+      const qty = document.getElementById('cropQty').value;
+      const price = document.getElementById('cropPrice').value;
+
+      // Add to sidebar produce list UI
+      const container = document.getElementById('produceItemList');
+      const newDiv = document.createElement('div');
+      newDiv.className = "p-3.5 rounded-2xl border border-slate-100 hover:border-emerald-200 bg-slate-50/50 transition-colors flex items-center justify-between";
+      newDiv.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+            🌱
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-900">${name}</h4>
+            <p class="text-[11px] text-slate-500">${qty} kg remaining</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold text-slate-900">LKR ${price}/kg</span>
+          <span class="block text-[10px] text-emerald-600 font-medium">Just Posted</span>
+        </div>
+      `;
+      container.prepend(newDiv);
+
+      closeListingModal();
+      document.getElementById('newProduceForm').reset();
+      showToast(`Listing for ${name} submitted to AgriLink exchange!`);
+    }
+
+    // Action Toast
+    function showToast(message) {
+      const toast = document.getElementById('toastMessage');
+      const text = document.getElementById('toastText');
+      text.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+
+    // Sidebar Toggle for Mobile
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById('mainSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (open) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    // Quick notification toggle
+    function toggleNotificationDropdown() {
+      const dd = document.getElementById('notifyDropdown');
+      dd.classList.toggle('hidden');
+    }
+
+    function setActiveNav(element) {
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.className = "nav-item flex items-center justify-between px-3.5 py-3 rounded-xl font-medium text-emerald-200/90 hover:bg-emerald-900/50 hover:text-white transition-all";
+      });
+      element.className = "nav-item flex items-center justify-between px-3.5 py-3 rounded-xl font-semibold bg-emerald-600 text-white shadow-md shadow-emerald-950/30 transition-all";
+    }
+
+    function quoteProduce(name, price) {
+      showToast(`Dispatch counter-offer generated for ${name} @ LKR ${price}/kg`);
+    }
+
+    function showOrderAction(id) {
+      showToast(`Reviewing details for order ${id}...`);
+    }
+
+    function exportReport() {
+      showToast("Downloading today's official DEC wholesale bulletin (PDF/Excel)...");
+    }
+
+    function requestAdvisoryModal() {
+      showToast("Connecting to DOA Agronomist & Pest Advisory line (1920)...");
+    }
+
+    // Initialize with default state
+    window.addEventListener('DOMContentLoaded', () => {
+      renderMarketTable(marketRates);
+      renderOrdersTable(ordersData);
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+
+      // Close notification dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        const notifyBtn = document.getElementById('notifyBtn');
+        const notifyDropdown = document.getElementById('notifyDropdown');
+        if (notifyBtn && notifyDropdown && !notifyBtn.contains(e.target) && !notifyDropdown.contains(e.target)) {
+          notifyDropdown.classList.add('hidden');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
