@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create an Account</title>
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #d1d5db;
+      --border-focus: #4f46e5;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .register-card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 420px;
+      padding: 32px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+
+    .register-header {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .register-header h1 {
+      font-size: 1.5rem;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .register-header p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .terms-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .terms-group input {
+      margin-top: 3px;
+    }
+
+    .terms-group a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    .terms-group a:hover {
+      text-decoration: underline;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 11px;
+      background-color: var(--primary-color);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .submit-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .register-footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .register-footer a {
+      color: var(--primary-color);
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .register-footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="register-card">
+    <div class="register-header">
+      <h1>Create Account</h1>
+      <p>Sign up to get started with your account</p>
+    </div>
+
+    <form action="/register" method="POST">
+      <div class="form-group">
+        <label for="fullname">Full Name</label>
+        <input type="text" id="fullname" name="fullname" placeholder="Jane Doe" required autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="jane@example.com" required autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="At least 8 characters" minlength="8" required autocomplete="new-password">
+      </div>
+
+      <div class="form-group">
+        <label for="confirm-password">Confirm Password</label>
+        <input type="password" id="confirm-password" name="confirm_password" placeholder="Re-enter password" minlength="8" required autocomplete="new-password">
+      </div>
+
+      <div class="terms-group">
+        <input type="checkbox" id="terms" name="terms" required>
+        <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</label>
+      </div>
+
+      <button type="submit" class="submit-btn">Create Account</button>
+    </form>
+
+    <div class="register-footer">
+      Already have an account? <a href="/login">Sign in</a>
+    </div>
+  </main>
+
+</body>
+</html>
