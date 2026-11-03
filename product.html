@@ -1,0 +1,455 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriLink LK - Products</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+    }
+
+    .product-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .modal {
+      display: none;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+      <a href="index.html" class="flex items-center gap-2">
+        <div class="bg-green-600 text-white p-2 rounded-xl">
+          <i data-lucide="sprout"></i>
+        </div>
+        <span class="text-xl font-extrabold text-green-800">
+          AgriLink <span class="text-green-500">LK</span>
+        </span>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
+        <a href="index.html" class="text-gray-600 hover:text-green-600">Dashboard</a>
+        <a href="product.html" class="text-green-700">Products</a>
+        <a href="payment.html" class="text-gray-600 hover:text-green-600">Payments</a>
+        <a href="login.html" class="text-gray-600 hover:text-green-600">Login</a>
+      </nav>
+
+      <a href="register.html"
+         class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700">
+        Register
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
+    <!-- Page heading -->
+    <section class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div>
+        <p class="text-green-600 text-sm font-bold uppercase tracking-wider">
+          Seller Dashboard
+        </p>
+        <h1 class="text-3xl font-extrabold text-gray-900 mt-2">
+          My Products
+        </h1>
+        <p class="text-gray-500 mt-2">
+          Manage your agricultural products and stock.
+        </p>
+      </div>
+
+      <button onclick="openModal()"
+        class="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+        <i data-lucide="plus" class="w-5 h-5"></i>
+        Add Product
+      </button>
+    </section>
+
+    <!-- Summary cards -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+
+      <div class="bg-white p-5 rounded-2xl border border-gray-200">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-gray-500 text-sm">Total Products</p>
+            <h2 id="totalProducts" class="text-3xl font-bold mt-2">4</h2>
+          </div>
+          <div class="bg-green-100 text-green-700 p-3 rounded-xl">
+            <i data-lucide="package" class="w-6 h-6"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-gray-200">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-gray-500 text-sm">Available Stock</p>
+            <h2 id="totalStock" class="text-3xl font-bold mt-2">450 kg</h2>
+          </div>
+          <div class="bg-blue-100 text-blue-700 p-3 rounded-xl">
+            <i data-lucide="boxes" class="w-6 h-6"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-gray-200">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-gray-500 text-sm">Low Stock Products</p>
+            <h2 id="lowStock" class="text-3xl font-bold mt-2">1</h2>
+          </div>
+          <div class="bg-amber-100 text-amber-700 p-3 rounded-xl">
+            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Search and filters -->
+    <section class="bg-white p-4 rounded-2xl border border-gray-200 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <div class="relative md:col-span-2">
+          <i data-lucide="search"
+             class="absolute left-3 top-3.5 w-5 h-5 text-gray-400"></i>
+
+          <input id="searchInput" type="text"
+            placeholder="Search products..."
+            oninput="filterProducts()"
+            class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:border-green-500">
+        </div>
+
+        <select id="categoryFilter" onchange="filterProducts()"
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-green-500">
+          <option value="all">All Categories</option>
+          <option value="Vegetables">Vegetables</option>
+          <option value="Fruits">Fruits</option>
+          <option value="Grains">Grains</option>
+        </select>
+
+      </div>
+    </section>
+
+    <!-- Product list -->
+    <section>
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="text-xl font-bold text-gray-900">Product Listings</h2>
+        <span id="productCount" class="text-sm text-gray-500">4 products</span>
+      </div>
+
+      <div id="productGrid"
+           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      </div>
+
+      <div id="emptyMessage" class="hidden text-center py-16">
+        <i data-lucide="package-search"
+           class="w-12 h-12 text-gray-300 mx-auto mb-3"></i>
+        <h3 class="font-bold text-gray-700">No products found</h3>
+        <p class="text-gray-500 text-sm mt-1">
+          Try another search or add a new product.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Add Product Modal -->
+  <div id="productModal"
+       class="modal fixed inset-0 z-50 bg-black/50 items-center justify-center p-4">
+
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">Add New Product</h2>
+
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-800">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <form id="productForm" class="space-y-4">
+
+        <div>
+          <label class="block text-sm font-semibold mb-2">Product Name</label>
+          <input id="productName" required
+            placeholder="e.g. Fresh Tomatoes"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-green-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-2">Category</label>
+          <select id="productCategory" required
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-green-500">
+            <option value="">Select Category</option>
+            <option value="Vegetables">Vegetables</option>
+            <option value="Fruits">Fruits</option>
+            <option value="Grains">Grains</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold mb-2">Price (Rs.)</label>
+            <input id="productPrice" type="number" min="1" required
+              placeholder="250"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-green-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold mb-2">Stock (kg)</label>
+            <input id="productStock" type="number" min="0" required
+              placeholder="100"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-green-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-2">Image URL (optional)</label>
+          <input id="productImage" type="url"
+            placeholder="https://example.com/image.jpg"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-green-500">
+        </div>
+
+        <div class="flex gap-3 pt-3">
+          <button type="button" onclick="closeModal()"
+            class="flex-1 border border-gray-200 rounded-xl py-3 font-semibold hover:bg-gray-50">
+            Cancel
+          </button>
+
+          <button type="submit"
+            class="flex-1 bg-green-600 text-white rounded-xl py-3 font-semibold hover:bg-green-700">
+            Add Product
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Sample products for demonstration.
+    // Replace these with database data when connecting your backend.
+
+    let products = [
+      {
+        id: 1,
+        name: "Fresh Tomatoes",
+        category: "Vegetables",
+        price: 250,
+        stock: 120,
+        image: "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        id: 2,
+        name: "Fresh Carrots",
+        category: "Vegetables",
+        price: 300,
+        stock: 80,
+        image: "https://images.unsplash.com/photo-1445282768818-728615cc910a?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        id: 3,
+        name: "Fresh Bananas",
+        category: "Fruits",
+        price: 180,
+        stock: 200,
+        image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        id: 4,
+        name: "Red Rice",
+        category: "Grains",
+        price: 220,
+        stock: 50,
+        image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80"
+      }
+    ];
+
+    const productGrid = document.getElementById("productGrid");
+    const emptyMessage = document.getElementById("emptyMessage");
+
+    function renderProducts(list = products) {
+      productGrid.innerHTML = "";
+
+      list.forEach(product => {
+        const lowStock = product.stock < 60;
+
+        const image = product.image
+          ? product.image
+          : "https://placehold.co/600x400/e2e8f0/64748b?text=Product";
+
+        const card = document.createElement("article");
+        card.className = "product-card bg-white rounded-2xl overflow-hidden border border-gray-200";
+
+        card.innerHTML = `
+          <div class="relative">
+            <img src="${image}"
+                 alt="${escapeHTML(product.name)}"
+                 class="w-full h-48 object-cover"
+                 onerror="this.src='https://placehold.co/600x400/e2e8f0/64748b?text=Product'">
+
+            <span class="absolute top-3 left-3 bg-white/95 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+              ${escapeHTML(product.category)}
+            </span>
+          </div>
+
+          <div class="p-5">
+            <div class="flex justify-between items-start gap-2">
+              <h3 class="font-bold text-gray-900 text-lg">
+                ${escapeHTML(product.name)}
+              </h3>
+
+              <span class="text-xs font-semibold px-2 py-1 rounded-full
+                ${lowStock ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}">
+                ${lowStock ? "Low Stock" : "Available"}
+              </span>
+            </div>
+
+            <p class="text-green-700 text-xl font-extrabold mt-3">
+              Rs. ${Number(product.price).toLocaleString("en-LK")}
+              <span class="text-xs text-gray-500 font-normal">/ kg</span>
+            </p>
+
+            <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+              <span class="text-sm text-gray-500">
+                Stock: <strong class="text-gray-800">${product.stock} kg</strong>
+              </span>
+
+              <button onclick="deleteProduct(${product.id})"
+                class="text-red-500 hover:text-red-700 text-sm font-semibold flex items-center gap-1">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                Remove
+              </button>
+            </div>
+          </div>
+        `;
+
+        productGrid.appendChild(card);
+      });
+
+      emptyMessage.classList.toggle("hidden", list.length !== 0);
+      document.getElementById("productCount").textContent =
+        `${list.length} product${list.length === 1 ? "" : "s"}`;
+
+      updateSummary();
+      lucide.createIcons();
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[char]));
+    }
+
+    function updateSummary() {
+      document.getElementById("totalProducts").textContent = products.length;
+
+      const totalStock = products.reduce(
+        (sum, product) => sum + Number(product.stock), 0
+      );
+
+      document.getElementById("totalStock").textContent =
+        totalStock.toLocaleString("en-LK") + " kg";
+
+      const lowStockCount = products.filter(
+        product => Number(product.stock) < 60
+      ).length;
+
+      document.getElementById("lowStock").textContent = lowStockCount;
+    }
+
+    function filterProducts() {
+      const search = document.getElementById("searchInput")
+        .value.toLowerCase().trim();
+
+      const category = document.getElementById("categoryFilter").value;
+
+      const filtered = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(search);
+        const matchesCategory =
+          category === "all" || product.category === category;
+
+        return matchesSearch && matchesCategory;
+      });
+
+      renderProducts(filtered);
+    }
+
+    function openModal() {
+      document.getElementById("productModal").classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("productModal").classList.remove("active");
+      document.getElementById("productForm").reset();
+    }
+
+    document.getElementById("productForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const newProduct = {
+        id: Date.now(),
+        name: document.getElementById("productName").value.trim(),
+        category: document.getElementById("productCategory").value,
+        price: Number(document.getElementById("productPrice").value),
+        stock: Number(document.getElementById("productStock").value),
+        image: document.getElementById("productImage").value.trim()
+      };
+
+      if (!newProduct.name || newProduct.price <= 0 || newProduct.stock < 0) {
+        alert("Please enter valid product details.");
+        return;
+      }
+
+      products.push(newProduct);
+
+      closeModal();
+      filterProducts();
+    });
+
+    function deleteProduct(id) {
+      if (!confirm("Are you sure you want to remove this product?")) {
+        return;
+      }
+
+      products = products.filter(product => product.id !== id);
+      filterProducts();
+    }
+
+    document.getElementById("productModal").addEventListener("click", function(event) {
+      if (event.target === this) {
+        closeModal();
+      }
+    });
+
+    renderProducts();
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>
